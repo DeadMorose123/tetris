@@ -1,0 +1,194 @@
+
+--------------------------------------------------
+TXLib сообщает:
+
+Программа: C:\Users\Andrey\source\repos\Tetris\Tetris.exe, файл: E:\Dima\TX\TXLib.h, строка: 11342, функция: bool {anonymous}::TX::txBitBlt(HDC, double, double, double, double, HDC, double, double),
+
+Сообщение: Параметр "sourceImage" неверен. Возможно, этот холст не создан, или уже уничтожен, или не загрузилась картинка.
+
+#1: TXLib [Ver: 00173a, Rev: 105, Date: 2018-12-19 00:00:00 +0300], Instance: 0x004FE2D4 (32-bit), Flags: CMdRe0, Thread: 0x3AAC (Main), GetLastError(): 13 (The data is invalid). 
+
+--------------------------------------------------
+Стек вызовов:
+
+# 0 0x0041F431 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: txBitBlt() at E:/Dima/TX/TXLib.h (11342)
+
+# 1 0x00426947 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: startGame() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (34):
+
+     32: void startGame ()
+     33:         {
+=>   34:         txBitBlt (txDC(), 0, 0, WndSize.x, WndSize.y, game);
+     35: 
+     36:         }
+
+# 2 0x00426A18 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: startMenu() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (46):
+
+     44:         if (checkButton (561, 205, 816, 297))// button of the game
+     45:             {
+=>   46:             startGame ();
+     47:             }
+     48:         if (checkButton (561, 316, 816, 408))// button of the options
+
+# 3 0x004268A6 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: main() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (27):
+
+     25: 
+     26: 
+=>   27:     startMenu (menu);
+     28: 
+     29:     return 0;
+
+--------------------------------------------------
+Стек вызовов TX:
+
+# 0 in bool {anonymous}::TX::txBitBlt(HDC, double, double, double, double, HDC, double, double) at E:\Dima\TX\TXLib.h (11342):
+
+  11340:     {
+  11341: $1  if (_TX_HDC_FAILED (destImage))   return false;
+=>11342: $   if (_TX_HDC_FAILED (sourceImage)) return false;
+  11343: 
+  11344: $   POINT size = txGetExtent (sourceImage);
+
+# 1 in void startGame() at C:\Users\Andrey\source\repos\Tetris\Tetris.cpp (34):
+
+     32: void startGame ()
+     33:         {
+=>   34:         txBitBlt (txDC(), 0, 0, WndSize.x, WndSize.y, game);
+     35: 
+     36:         }
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 105, Date: 2018-12-19 00:00:00 +0300]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	E:\Dima\TX\TXLib.h
+Compiled:	Apr 15 2019 10:41:04, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, DEBUG
+Started:	Apr 15 2019 10:41:08
+
+Run file:	C:\Users\Andrey\source\repos\Tetris\Tetris.exe
+Directory:	C:\Users\Andrey\source\repos\Tetris
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: C:\Users\Andrey\source\repos\Tetris\Tetris.exe, файл: E:\Dima\TX\TXLib.h, строка: 10801, функция: POINT {anonymous}::TX::txGetExtent(HDC),
+
+Сообщение: Обнаружен нулевой или ложный результат.
+
+#1: TXLib [Ver: 00173a, Rev: 105, Date: 2018-12-19 00:00:00 +0300], Instance: 0x004FE2D4 (32-bit), Flags: CMdRe0, Thread: 0x2DA0 (Main). 
+
+--------------------------------------------------
+Стек вызовов:
+
+# 0 0x00418F04 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: txGetExtent() at E:/Dima/TX/TXLib.h (10801)
+# 1 0x0041F472 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: txBitBlt() at E:/Dima/TX/TXLib.h (11344)
+
+# 2 0x00426AA4 in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: startMenu() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (38):
+
+     36: void startMenu (HDC menu, HDC game, HDC tetromino)
+     37:     {
+=>   38:     txBitBlt (txDC(), 0, 0, WndSize.x, WndSize.y, menu);
+     39: 
+     40:     while (true)
+
+# 3 0x0042695F in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: main() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (25):
+
+     23:     txDeleteDC (tetromino);
+     24: 
+=>   25:     startMenu (menu, game, tetromino);
+     26: 
+     27:     return 0;
+
+--------------------------------------------------
+Стек вызовов TX:
+
+# 0 in POINT {anonymous}::TX::txGetExtent(HDC) at E:\Dima\TX\TXLib.h (10801):
+
+  10799: 
+  10800: $   BITMAP bmap = {0};
+=>10801: $   txGDI (Win32::GetObject (Win32::GetCurrentObject (dc, OBJ_BITMAP), sizeof (bmap), &bmap), dc) asserted;
+  10802: 
+  10803: $   POINT  size = { bmap.bmWidth, bmap.bmHeight };
+
+# 1 in bool {anonymous}::TX::txBitBlt(HDC, double, double, double, double, HDC, double, double) at E:\Dima\TX\TXLib.h (11344):
+
+  11342: $   if (_TX_HDC_FAILED (sourceImage)) return false;
+  11343: 
+=>11344: $   POINT size = txGetExtent (sourceImage);
+  11345: $   if (!width)  width  = size.x;
+  11346: $   if (!height) height = size.y;
+
+# 2 in void startMenu(HDC, HDC, HDC) at C:\Users\Andrey\source\repos\Tetris\Tetris.cpp (38):
+
+     36: void startMenu (HDC menu, HDC game, HDC tetromino)
+     37:     {
+=>   38:     txBitBlt (txDC(), 0, 0, WndSize.x, WndSize.y, menu);
+     39: 
+     40:     while (true)
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 105, Date: 2018-12-19 00:00:00 +0300]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	E:\Dima\TX\TXLib.h
+Compiled:	Apr 15 2019 10:52:09, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, DEBUG
+Started:	Apr 15 2019 10:52:12
+
+Run file:	C:\Users\Andrey\source\repos\Tetris\Tetris.exe
+Directory:	C:\Users\Andrey\source\repos\Tetris
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: C:\Users\Andrey\source\repos\Tetris\Tetris.exe, файл: C:\Users\Andrey\source\repos\Tetris\Tetris.cpp, строка: 49, функция: void drawMenu(Button*, int),
+
+Сообщение: ВНЕЗАПНО: Логическая ошибка: Неверно, что "0 <= i && i < quantity-1".
+
+#1: TXLib [Ver: 00173a, Rev: 105, Date: 2018-12-19 00:00:00 +0300], Instance: 0x004FE2D4 (32-bit), Flags: CMdRe0, Thread: 0x1F94 (Main). 
+
+--------------------------------------------------
+Стек вызовов:
+
+# 0 0x00426C6E in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: drawMenu() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (49):
+
+     47:         for (int i = 0; i <= quantity; i++)
+     48:             {
+=>   49:             assert (0 <= i && i < quantity-1);
+     50:             menu[i].draw();
+     51:             }
+
+# 1 0x00426BFF in C:\Users\Andrey\source\repos\Tetris\Tetris.exe: main() at C:/Users/Andrey/source/repos/Tetris/Tetris.cpp (26):
+
+     24:                      {561, 649, 255, 92, "Tutorial and help"}};
+     25: 
+=>   26:     drawMenu (menu, sizeof(menu) / sizeof(menu[0]));
+     27: 
+     28:     /*char nameOfMenu[5] = "menu";
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 105, Date: 2018-12-19 00:00:00 +0300]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	E:\Dima\TX\TXLib.h
+Compiled:	Apr 16 2019 21:17:07, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, DEBUG
+Started:	Apr 16 2019 21:17:10
+
+Run file:	C:\Users\Andrey\source\repos\Tetris\Tetris.exe
+Directory:	C:\Users\Andrey\source\repos\Tetris
+
+--------------------------------------------------
