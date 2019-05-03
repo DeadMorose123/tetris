@@ -1,0 +1,18 @@
+//=============================================================================
+
+HDC loadDC (char *nameOfPic)
+    {
+    char url[50] = "Images\\";
+    strcat (url, nameOfPic);
+    strcat (url, ".bmp");
+
+    HDC picture = txLoadImage (url);
+
+    char check[50] = "I can't load background from ";
+    strcat (check, url);
+    if (!picture) txMessageBox (check);
+
+    return picture;
+    }
+
+//=============================================================================
