@@ -6,59 +6,12 @@ class Button
         enum state_t {released, hovered, pressed};
 
         double x, y, sizeX, sizeY;
-        char text[MaxLenWord];
-        int id;
+        char text [MaxLenWord];
         state_t state;
         HDC pic;
 
         void draw ();
-        int check();
-        void loadButtons ();
+        int check ();
+        void dump ();
     };
-//=============================================================================
-void Button :: draw ()
-    {
-    txAlphaBlend (txDC (), 0, 0, WndSize.x, WndSize.y, 
 
-    }
-//=============================================================================
-int Button :: check ()
-    {
-    state_t oldState = state;
-
-    if (x       < txMouseX() && y       < txMouseY() &&
-        x+sizeX > txMouseX() && x+sizeY > txMouseY())
-        {
-        state = hovered;
-        return 1;
-        if (txMouseButtons() == 1)
-            {
-            state = pressed;
-            }
-        }
-    else
-        {
-        state = released;
-        return 0;
-        }
-
-    if (oldState == 2)
-        {
-        return 2;
-
-        }
-    }
-//=============================================================================
-void loadButtons (Resourse Resourses[])
-    {
-    for (int i = 0; Resoutses[i].name[0] == 0; i++)
-        {
-        for (int j = 0; ROUND (ButMenu[i].sizeX); i++)
-            {
-            if (strcmp(Resoutses[i].name, ButMenu[i].text) == 0)
-                {
-                ButMenu[i].pic = Resoutses[i].pic
-                }
-            }
-        }
-    }

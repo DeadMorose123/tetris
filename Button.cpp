@@ -1,21 +1,26 @@
+void Button :: dump ()
+    {
 
+    printf ("Button { x = %lg, y = %lg, sizeX = %lg, sizeY = %lg, text <%s>, state %i, pic %p }\n", x, y, sizeX, sizeY, text, state, pic);
+
+    }
 
 //=============================================================================
 void Button :: draw ()
     {
-    txAlphaBlend (txDC (), x, y, x+sizeX, y+sizeY, pic);
+    assert (pic);
+    txAlphaBlend (txDC (), x, y, sizeX, sizeY, pic);
 
     }
 //=============================================================================
 int Button :: check ()
     {
-    state_t oldState = state;
 
     if (x       < txMouseX() && y       < txMouseY() &&
-        x+sizeX > txMouseX() && x+sizeY > txMouseY())
+        x+sizeX > txMouseX() && y+sizeY > txMouseY())
         {
         state = hovered;
-        return 1;
+
         if (txMouseButtons() == 1)
             {
             state = pressed;
@@ -24,13 +29,7 @@ int Button :: check ()
     else
         {
         state = released;
-        return 0;
         }
-
-    if (oldState == 2)
-        {
-        return 2;
-
-        }
+    return state;
     }
 

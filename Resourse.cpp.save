@@ -1,0 +1,22 @@
+//=============================================================================
+
+HDC loadDC (char *nameOfPic)
+    {
+    char url[] = "Images\\";
+    strcat (url, nameOfPic);
+    strcat (url, ".bmp");
+
+    HDC picture = txLoadImage (url);
+
+    printf ("name <%s>, picture %p\n", nameOfPic, picture);
+
+    char check[50] = "I can't load background from ";
+    strcat (check, url);
+    if (!picture) txMessageBox (check);
+
+
+    txBitBlt (txDC (), 100, 100, 0, 0, picture);
+    return picture;
+    }
+
+//=============================================================================
