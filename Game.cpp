@@ -1,142 +1,170 @@
 #include "TXLib.h"
-#include <cstring>
 
-const POINT WndSize = {870, 1023};
+const int M = 22;
+const int N = 12;
 
-#include "Button.h"
-#include "Button.cpp"
-
-#include "Resourse.h"
-#include "Resourse.cpp"
-
-bool checkBgutton (double x1,double y1,double x2,double y2);
-void drawButtons (Button ButMenu[]);
-void start (Resourse Resourses []);
-std :: pair <int, Button :: state_t> drawMenu (Button ButMenu []);
-void loadResourses (Resourse Resourses[]);
-void deleteResourses (Resourse Resourses[]);
-void loadButtons (Resourse Resourses[], Button ButMenu[]);
-void checkButtons (Button ButMenu[]);
-
-#define END  {}
-#define debug printf("= %d  \n", __LINE__)
-
-int main ()
+struct aKeyBoardControl
     {
-    _txConsoleMode = SW_SHOW;
+    int left, up, right, down;
+    };
+
+struct Point
+    {int x, y;};
+
+Point posOfFigur[4], oldPosOfFigur[4];
+
+void keyBoardControl (const aKeyBoardControl theControl);
+bool check ();
+void Rotate ();
+void tick ();
+void draw (HDC tiles, HDC background);
+void checkLines ();
+int game(HDC tiles, HDC background);
+
+int field[M][N] = {0};
+
+
+int figures[7][4] =
+    {
+    1, 3, 5, 7, // I
+    2, 4, 5, 7, // Z
+    3, 5, 4, 6, // S
+    3, 5, 4, 7, // T
+    2, 3, 5, 7, // L
+    3, 5, 7, 6, // J
+    2, 3, 4, 5, // O
+    };
+
+int n;
+int colorNum;
+
+int game (HDC tiles, HDC background)
+    {
+    //printf ("%i\n", check());
     txBegin ();
-    txCreateWindow (WndSize.x, WndSize.y);
+    //txCreateWindow (WndSize.x, WndSize.y);
 
-    Button ButMenu[] = {{  0,   0,   0,  0, "Framework"        },  // 0
-                        {561, 205, 255, 92, "Game"             },  // 1
-                        {561, 316, 255, 92, "Options"          },  // 2
-                        {561, 427, 255, 92, "Achievements"     },  // 3
-                        {561, 538, 255, 92, "Leaderboards"     },  // 4
-                        {561, 649, 255, 92, "Tutorial and help"},  // 5
-                        END                                     };
+    aKeyBoardControl Player = {'A', 'W', 'D', 'S'};
 
-    Resourse Resourses[] = {{"Game"            }, // 0
-                           {"Options"          }, // 1
-                           {"Achievements"     }, // 2
-                           {"Leaderboards"     }, // 3
-                           {"Tutorial and help"}, // 4
-                           {"Menu"             }, // 5
-                           {"Tetris"           }, // 6
-                           {"Tetromino"        }, // 7
-                           {"Framework"        }, // 8
-                           END                  };
-
-    loadResourses (Resourses);
-    loadButtons (Resourses, ButMenu);
-
-    while (!GetAsyncKeyState (VK_ESCAPE))
+    while (check())
         {
+        keyBoardControl (Player);
 
-        start (Resourses);
-        //auto state = drawMenu (ButMenu);
-        //printf ("button %i, state %i\n", state.first, state.second);
+        tick();
 
-        txSleep (50);
+        checkLines ();
+
+        draw (tiles, background);
+
+
+        txSleep (100);
         }
-    deleteResourses (Resourses);
+    for (int i = 0; i < M; i++)
+        for (int j = 0; j < N; j++)
+            {
+            if (field[i][j] == 0) continue;
+            field [i][j] = 0;
+            }
+
+
     return 0;
     }
-//=============================================================================
-std :: pair <int, Button :: state_t> drawMenu (Button ButMenu [])
-        {
-        for (int i = 1; ROUND(ButMenu[i].sizeX); i++)
-            {
-            ButMenu[i].draw();
-            }
-
-        for (int i = 1; ROUND(ButMenu[i].sizeX); i++)
-            {
-            int state = ButMenu[i].check ();
-            //printf ("state %i\n", state);
-            //printf ("i, %i\n", i);
-
-            //printf ("%i = \n", ButMenu[i].check ());
-
-            if (state == 1)
-                {
-
-                txAlphaBlend (txDC (), 3+ButMenu[i].x, ButMenu[i].y, 0, 0, ButMenu[0].pic);
-
-                return std :: pair <int, Button :: state_t> (i, Button :: hovered);
-                }
-            else if (state == 2)
-                {
-                return std :: pair <int, Button :: state_t> (i, Button :: pressed);
-                }
-            }
-
-        return std :: pair <int, Button :: state_t> (0, Button :: released);
-        }
-//=============================================================================
-void start (Resourse Resourses [])
+//====================================================
+void checkLines ()
     {
-    for (int i = 0; Resourses[i].name[0] != 0; i++)
+    int k=M-1;
+	for (int i=M-1;i>0;i--)
         {
-
-        if (strcmp(Resourses[i].name, "Menu") == 0)
+		int count=0;
+		for (int j=0;j<N;j++)
             {
-            txBitBlt (txDC(), 0, 0, WndSize.x, WndSize.y, Resourses[i].pic);
-
+		    if (field[i][j]) count++;
+		    field[k][j]=field[i][j];
             }
+		if (count<N) k--;
         }
+     }
+//====================================================
+void draw (HDC tiles, HDC background)
+    {
+    txBitBlt (txDC (), 0, 0, 0, 0, background);
+
+    for (int i = 0; i < M; i++)
+        for (int j = 0; j < N; j++)
+            {
+            if (field[i][j] == 0) continue;
+            txBitBlt (txDC (), j*45+27, i*45, 45, 45, tiles, field[i][j]*45, 0);
+            }
+    for (int i = 0; i < 4; i++)
+        {
+        txBitBlt (txDC (), posOfFigur[i].x*45+27, posOfFigur[i].y*45, 45, 45, tiles, colorNum*45, 0);
+        }
+
     }
-//=============================================================================
-void loadResourses (Resourse Resourses[])
+//====================================================
+void tick ()
     {
-    for (int i = 0; Resourses[i].name[0] != 0; i++)
-        {
-        Resourses[i].pic = loadDC (Resourses[i].name);
-        }
-    }
-//=============================================================================
-void deleteResourses (Resourse Resourses[])
-    {
-    for (int i = 0; Resourses[i].name[1] != 0; i++)
-        {
-        txDeleteDC(Resourses[i].pic);
-        }
-    }
-//=============================================================================
-void loadButtons (Resourse Resourses[], Button ButMenu[])
-    {
-    for (int i = 0; Resourses[i].name[0] != 0; i++)
-        {
-        //printf ("\n" "i %i, name <%s>, pic %p\n", i, Resourses[i].name, Resourses[i].pic);
+    for (int i = 0; i < 4; i++) { oldPosOfFigur[i] = posOfFigur[i]; posOfFigur[i].y += 1; }
 
-        for (int j = 0; ButMenu[j].text[0] != 0; j++)
+    if (!check())
+        {
+        for (int i = 0; i < 4; i++) {field [oldPosOfFigur[i].y][oldPosOfFigur[i].x] = colorNum;}
+
+        n = rand() % 6;
+        colorNum = 1 + rand() % 7;
+
+        for (int i = 0; i < 4; i++)
             {
-            //printf ("j %i, text <%s>\n", j, ButMenu[j].text);
-
-            if (strcmp(Resourses[i].name, ButMenu[j].text) == 0)
-                {
-                ButMenu[j].pic = Resourses[i].pic;
-                //printf ("name <%s>, text <%s>, pic %p\n", Resourses[i].name, ButMenu[j].text, ButMenu[j].pic);
-                }
+            posOfFigur[i].x = figures[n][i] % 2;
+            posOfFigur[i].y = figures[n][i] / 2;
             }
         }
+
+    }
+//====================================================
+void keyBoardControl (const aKeyBoardControl theControl)
+    {
+    int dx = 0;
+    if (GetAsyncKeyState (theControl.right))
+        {
+        dx = 1;
+        }
+
+    if (GetAsyncKeyState (theControl.left))
+        {
+        dx = -1;
+        }
+    if (GetAsyncKeyState (theControl.up))
+        {
+        Rotate ();
+        }
+
+    for (int i=0;i<4;i++)  { oldPosOfFigur[i]=posOfFigur[i]; posOfFigur[i].x+=dx; }
+    if (!check()) for (int i=0;i<4;i++) posOfFigur[i] = oldPosOfFigur[i];
+    }
+//====================================================
+bool check ()
+    {
+    for (int i = 0; i < 4; i++)
+        {
+        if (posOfFigur[i].x < 0 || posOfFigur[i].x >= N || posOfFigur[i].y >= M) return false;
+            else if (field[posOfFigur[i].y][posOfFigur[i].x]) return false;
+        }
+    return true;
+
+
+    }
+//====================================================
+void Rotate ()
+    {
+    Point p = posOfFigur[1]; // центр вращения
+    for (int i = 0; i < 4; i++)
+        {
+        int x  = posOfFigur[i].y - p.y;
+        int y  = posOfFigur[i].x - p.x;
+        posOfFigur[i].x =    p.x -   x;
+        posOfFigur[i].y =    p.y +   y;
+        }
+
+    if (!check()) for (int i=0;i<4;i++) posOfFigur[i]=oldPosOfFigur[i];
     }
