@@ -10,7 +10,7 @@ HDC loadDC (char *nameOfPic)
 
     //printf ("name <%s>, picture %p\n", url, picture);
 
-    char check[MaxLenWord * 2] = "I can't load background from ";
+    char check[MaxLenWord * 2] = "I can't load picture from ";
     strncat (check, url, sizeof(check)-1);
     if (!picture) txMessageBox (check);
 

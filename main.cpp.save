@@ -79,7 +79,7 @@ void checkButtons (Button ButMenu [], Resourse Resourses [])
 
         if (ButMenu[1].check () == 2)
             {
-            PlayGame (Resourses [7].pic, Resourses [6].pic, 0);
+            PlayGame (Resourses [7].pic, Resourses [6].pic, );
             txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
             txSleep (3000);
             }
