@@ -1,16 +1,16 @@
-#include "TXLib.h"
+#include "TXLib104.h"
 #include <cstring>
+
 
 const POINT WndSize = {870, 1023};
 
 #include "Button.h"
 #include "Button.cpp"
 
-#include "Resourse.h"
-#include "Resourse.cpp"
+#include "Resource.h"
+#include "Resource.cpp"
 
 #include "game.cpp"
-
 
 void checkButtons (Button ButMenu [],Resourse Resourses[]);
 void loadResourses (Resourse Resourses[]);
@@ -18,12 +18,6 @@ void deleteResourses (Resourse Resourses[]);
 void loadButtons (Resourse Resourses[], Button ButMenu[]);
 
 void drawMenu (Resourse Resourses [], Button ButMenu []);
-
-void Options (Resourse Resourses []);
-void Achievements (Resourse Resourses []);
-void Leaderboards (Resourse Resourses []);
-void TutorialAndHelp (Resourse Resourses []);
-
 
 #define END  {}
 #define debug printf("= %d  \n", __LINE__)
@@ -83,11 +77,14 @@ void checkButtons (Button ButMenu [], Resourse Resourses [])
             txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
             txSleep (3000);
             }
-        if (ButMenu[4].check () == 2)
+        if (GetAsyncKeyState (VK_OEM_3))
             {
-            PlayGame (Resourses [7].pic, Resourses [6].pic, 1);
-            txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
-            txSleep (3000);
+            if (strcmp (txInputBox ("Type your cheat code", "CHEAT"), "qwert") == 0)
+                {
+                PlayGame (Resourses [7].pic, Resourses [6].pic, 1);
+                txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
+                txSleep (3000);
+                }
             }
         }
 //=============================================================================
@@ -117,7 +114,7 @@ void drawMenu (Resourse Resourses [], Button ButMenu [])
 
         if (state == 1)
             {
-            txAlphaBlend (txDC (), 3+ButMenu[i].x, ButMenu[i].y, 0, 0, ButMenu[0].pic);
+            txAlphaBlend (txDC (), 3+ButMenu[i].x, ButMenu[i].y, 260, 100, ButMenu[0].pic);
             }
         }
     }

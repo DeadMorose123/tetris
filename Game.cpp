@@ -1,4 +1,4 @@
-#include "TXLib.h"
+#include "TXLib104.h"
 
 const int SizeY = 22;  // SizeField [Pixels] / SizeTile
 const int SizeX = 12;  // SizeField [Pixels] / SizeTile
@@ -18,15 +18,15 @@ Point posOfFigur[4] = {}, oldPosOfFigur[4] = {};
 void keyBoardControl (const aKeyBoardControl theControl);
 bool checkBorder ();
 void RotateFigure ();
-void StepPlayGame (bool cheatMode);
-void DrawPlayGame (HDC tiles, HDC background);
-void CheakIsLineReady ();
+void StepPlayGame (bool cheatMode, int* ColorNum, int* NumBrick);
+void DrawPlayGame (HDC tiles, HDC background, int ColorNum);
+void CheakIsLineReady (int* NLines);
 int PlayGame(HDC tiles, HDC background, bool cheatMode);
-void CreatNewFigure (bool cheatMode);
-void PrintScore ();
+void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum);
+void PrintScore (int NLines);
+void PrintTime (int timer);
 
 int Field[SizeY][SizeX] = {0};
-
 
 const int Figures[7][4] =
     {
@@ -39,33 +39,37 @@ const int Figures[7][4] =
     {2, 3, 4, 5}  // O  6
     };
 
-int n = rand() % 6;;
-int colorNum = 1 + rand() % 7;
-
-int NLine = 0;
-
 int PlayGame (HDC tiles, HDC background, bool cheatMode)
     {
+    int NumBrick = rand() % 6;
+    int ColorNum = 1 + rand() % 7;
 
-    //printf ("%i\n", checkBorder());
+    int NLines = 0;
+
+    //int speed = 0.5;
+
+    int timer = GetTickCount ();
+    //printf ("%i\NumBrick", checkBorder());
     txBegin ();
 
     aKeyBoardControl Player = {'A', 'W', 'D', 'S'};
 
-    CreatNewFigure (cheatMode);
+    CreatNewFigure (cheatMode, &NumBrick, &ColorNum);
 
     while (checkBorder())
         {
 
         keyBoardControl (Player);
 
-        StepPlayGame(cheatMode);
+        StepPlayGame(cheatMode, &ColorNum, &NumBrick);
 
-        CheakIsLineReady ();
+        CheakIsLineReady (&NLines);
 
-        DrawPlayGame (tiles, background);
+        DrawPlayGame (tiles, background, ColorNum);
 
-        PrintScore ();
+        PrintScore (NLines);
+
+        PrintTime (timer);
 
         txSleep (100);
         }
@@ -74,44 +78,66 @@ int PlayGame (HDC tiles, HDC background, bool cheatMode)
         for (int x = 0; x < SizeX; x++)
             Field [y][x] = 0;
 
-    NLine = 0;
+    NLines = 0;
+
+    PrintTime(timer);
 
     return 0;
     }
+
 //====================================================
 
-void PrintScore ()
+void PrintTime (int timer)
+    {
+    timer = GetTickCount () - timer;
+
+    char textOfTime [10] = "";
+    sprintf (textOfTime, "%i:%i", timer/60000, timer/1000);
+    txSetColor (TX_BLACK);
+
+    if (txFontExist ("Impact")) txSelectFont ("Impact", 100);
+    if (txFontExist ("Ubuntu")) txSelectFont ("Ubuntu", 150);
+
+    txDrawText (621, 824, 799, 979, textOfTime);
+    }
+
+//====================================================
+
+void PrintScore (int NLines)
     {
     char lines [10] = "";
-    sprintf (lines, "%i", NLine*10);
+    sprintf (lines, "%i", NLines*10);
     txSetColor (TX_BLACK);
-    txSelectFont ("Impact", 150);
+
+    if (txFontExist ("Impact")) txSelectFont ("Impact", 100);
+    if (txFontExist ("Ubuntu")) txSelectFont ("Ubuntu", 150);
+
     txDrawText (621, 585, 799, 736, lines);
     }
 
 //====================================================
 
-void CreatNewFigure (bool cheatMode)
+void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum)
     {
-    if (cheatMode) n = 0;
+    if (cheatMode) *NumBrick = 0;
 
-    else n = rand() % 6;
+    else *NumBrick = rand() % 6;
 
-    //printf ("%i", n);
+    //printf ("%i", NumBrick);
 
-    colorNum = 1 + rand() % 7;
+    *ColorNum = 1 + rand() % 7;
 
     for (int i = 0; i < 4; i++)
         {
-        posOfFigur[i].x = Figures[n][i] % 2 + SizeX / 2;
+        posOfFigur[i].x = Figures[*NumBrick][i] % 2 + SizeX / 2;
 
-        posOfFigur[i].y = Figures[n][i] / 2;
+        posOfFigur[i].y = Figures[*NumBrick][i] / 2;
         }
     }
 
 //====================================================
 
-void CheakIsLineReady ()
+void CheakIsLineReady (int* NLines)
     {
     int nLines = SizeY-1;
 
@@ -127,15 +153,15 @@ void CheakIsLineReady ()
 
 
 		if (count < SizeX) nLines-- ;
-		else NLine ++;
+		else (*NLines) ++;
         }
      }
 
 //====================================================
 
-void DrawPlayGame (HDC tiles, HDC background)   // DrawField
+void DrawPlayGame (HDC tiles, HDC background, int ColorNum)   // DrawField
     {
-    txBitBlt (0, 0, background);
+    txBitBlt (txDC (), 0, 0, WndSize.x, WndSize.y, background);
 
     for (int i = 0; i < SizeY; i++)   // TODO change i to y; j to x
         for (int j = 0; j < SizeX; j++)
@@ -149,17 +175,15 @@ void DrawPlayGame (HDC tiles, HDC background)   // DrawField
 
     for (int i = 0; i < 4; i++)
         {
-        //printf ("x %i, y %i\n", posOfFigur [i].x, posOfFigur [i].y);
+        //printf ("x %i, y %i\NumBrick", posOfFigur [i].x, posOfFigur [i].y);
 
-        txBitBlt (txDC (), posOfFigur [i].x * SizeTile + WField, posOfFigur [i].y * SizeTile, SizeTile, SizeTile, tiles, colorNum * SizeTile, 0);
+        txBitBlt (txDC (), posOfFigur [i].x * SizeTile + WField, posOfFigur [i].y * SizeTile, SizeTile, SizeTile, tiles, ColorNum * SizeTile, 0);
         }
-
-    //printf ("\n");
     }
 
 //====================================================
 
-void StepPlayGame (bool cheatMode)   // UpdatePlayGame
+void StepPlayGame (bool cheatMode, int* ColorNum, int* NumBrick)   // UpdatePlayGame
     {
     for (int i = 0; i < 4; i++)
         {
@@ -170,9 +194,9 @@ void StepPlayGame (bool cheatMode)   // UpdatePlayGame
 
     if (!checkBorder ())
         {
-        for (int i = 0; i < 4; i++) {Field [oldPosOfFigur[i].y][oldPosOfFigur[i].x] = colorNum;}
+        for (int i = 0; i < 4; i++) {Field [oldPosOfFigur[i].y][oldPosOfFigur[i].x] = *ColorNum;}
 
-        CreatNewFigure (cheatMode);
+        CreatNewFigure (cheatMode, NumBrick, ColorNum);
         }
     }
 
@@ -190,6 +214,7 @@ void keyBoardControl (const aKeyBoardControl theControl)
 
     if (GetAsyncKeyState (theControl.up))
         RotateFigure ();
+        txSleep (10);
 
     for (int i = 0; i < 4; i++) { oldPosOfFigur [i] = posOfFigur [i]; posOfFigur [i].x += dx; }
 

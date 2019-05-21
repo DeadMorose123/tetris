@@ -1,3 +1,5 @@
+
+
 const int MaxLenWord = 50;
 
 class Button
