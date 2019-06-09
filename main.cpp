@@ -1,6 +1,5 @@
-#include "TXLib104.h"
+#include "include.h"
 #include <cstring>
-
 
 const POINT WndSize = {870, 1023};
 
@@ -10,7 +9,7 @@ const POINT WndSize = {870, 1023};
 #include "Resource.h"
 #include "Resource.cpp"
 
-#include "game.cpp"
+#include "Game.cpp"
 
 void checkButtons (Button ButMenu [],Resourse Resourses[]);
 void loadResourses (Resourse Resourses[]);
@@ -74,6 +73,7 @@ void checkButtons (Button ButMenu [], Resourse Resourses [])
         if (ButMenu[1].check () == 2)
             {
             PlayGame (Resourses [7].pic, Resourses [6].pic, 0);
+
             txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
             txSleep (3000);
             }
@@ -99,7 +99,6 @@ void drawMenu (Resourse Resourses [], Button ButMenu [])
             }
         }
 
-
     for (int i = 1; ROUND(ButMenu[i].sizeX); i++)   //buttons
             {
             ButMenu[i].draw();
@@ -107,10 +106,6 @@ void drawMenu (Resourse Resourses [], Button ButMenu [])
     for (int i = 1; ROUND(ButMenu[i].sizeX); i++)
         {
         int state = ButMenu[i].check ();
-        //printf ("state %i\n", state);
-        //printf ("i, %i\n", i);
-
-        //printf ("%i = \n", ButMenu[i].check ());
 
         if (state == 1)
             {
@@ -139,16 +134,13 @@ void loadButtons (Resourse Resourses[], Button ButMenu[])
     {
     for (int i = 0; Resourses[i].name[0] != 0; i++)
         {
-        //printf ("\n" "i %i, name <%s>, pic %p\n", i, Resourses[i].name, Resourses[i].pic);
 
         for (int j = 0; ButMenu[j].text[0] != 0; j++)
             {
-            //printf ("j %i, text <%s>\n", j, ButMenu[j].text);
 
             if (strcmp(Resourses[i].name, ButMenu[j].text) == 0)
                 {
                 ButMenu[j].pic = Resourses[i].pic;
-                //printf ("name <%s>, text <%s>, pic %p\n", Resourses[i].name, ButMenu[j].text, ButMenu[j].pic);
                 }
             }
         }

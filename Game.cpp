@@ -1,4 +1,4 @@
-#include "TXLib104.h"
+#include "include.h"
 
 const int SizeY = 22;  // SizeField [Pixels] / SizeTile
 const int SizeX = 12;  // SizeField [Pixels] / SizeTile
@@ -13,20 +13,21 @@ struct aKeyBoardControl
 struct Point
     {int x, y;};
 
-Point posOfFigur[4] = {}, oldPosOfFigur[4] = {};
+Point posOfFigur[4] = {};  // TODO del from global list
 
-void keyBoardControl (const aKeyBoardControl theControl);
-bool checkBorder ();
-void RotateFigure ();
-void StepPlayGame (bool cheatMode, int* ColorNum, int* NumBrick);
-void DrawPlayGame (HDC tiles, HDC background, int ColorNum);
-void CheakIsLineReady (int* NLines);
+void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl);
+bool checkBorder (int Field[SizeY][SizeX]);
+void RotateFigure (int Field[SizeY][SizeX]);
+void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* NumBrick);
+void DrawPlayGame (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum);
+void CheakIsLineReady (int Field[SizeY][SizeX], int* NLines);
 int PlayGame(HDC tiles, HDC background, bool cheatMode);
 void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum);
+void copyArray (Point oldArr [], Point newArr [], int lenArr);
+
 void PrintScore (int NLines);
 void PrintTime (int timer);
-
-int Field[SizeY][SizeX] = {0};
+//void PrintNextFigure (int Field[SizeY][SizeX], HDC tiles);
 
 const int Figures[7][4] =
     {
@@ -41,35 +42,42 @@ const int Figures[7][4] =
 
 int PlayGame (HDC tiles, HDC background, bool cheatMode)
     {
+
+
+    Music music;//создаем объект музыки
+    music.openFromFile("music.ogg");//загружаем файл
+    music.play();//воспроизводим музыку
+    int Field[SizeY][SizeX] = {0};
+
     int NumBrick = rand() % 6;
+
     int ColorNum = 1 + rand() % 7;
 
     int NLines = 0;
 
-    //int speed = 0.5;
-
     int timer = GetTickCount ();
-    //printf ("%i\NumBrick", checkBorder());
     txBegin ();
 
     aKeyBoardControl Player = {'A', 'W', 'D', 'S'};
 
+
     CreatNewFigure (cheatMode, &NumBrick, &ColorNum);
 
-    while (checkBorder())
+    while (checkBorder(Field))
         {
+        StepPlayGame(Field, cheatMode, &ColorNum, &NumBrick);
 
-        keyBoardControl (Player);
+        keyBoardControl (Field, Player);
 
-        StepPlayGame(cheatMode, &ColorNum, &NumBrick);
+        CheakIsLineReady (Field, &NLines);
 
-        CheakIsLineReady (&NLines);
-
-        DrawPlayGame (tiles, background, ColorNum);
+        DrawPlayGame (Field, tiles, background, ColorNum);
 
         PrintScore (NLines);
 
         PrintTime (timer);
+
+        //PrintNextFigure (Field, tiles);
 
         txSleep (100);
         }
@@ -86,13 +94,25 @@ int PlayGame (HDC tiles, HDC background, bool cheatMode)
     }
 
 //====================================================
+/*void PrintNextFigure (int Field[SizeY][SizeX], HDC tiles)
+    {
+    for (int i = 0; i < SizeY; i++)
+        {
+
+        txBitBlt (txDC (), 625, 90, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
+        }
+    } */
+
+//====================================================
 
 void PrintTime (int timer)
     {
     timer = GetTickCount () - timer;
 
-    char textOfTime [10] = "";
-    sprintf (textOfTime, "%i:%i", timer/60000, timer/1000);
+    char textOfTime [50] = "";
+    unsigned n = sprintf (textOfTime, "%i:%i", timer/60000, timer/1000);
+    assert (n < sizeof (textOfTime) - 1);
+
     txSetColor (TX_BLACK);
 
     if (txFontExist ("Impact")) txSelectFont ("Impact", 100);
@@ -123,8 +143,6 @@ void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum)
 
     else *NumBrick = rand() % 6;
 
-    //printf ("%i", NumBrick);
-
     *ColorNum = 1 + rand() % 7;
 
     for (int i = 0; i < 4; i++)
@@ -137,7 +155,7 @@ void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum)
 
 //====================================================
 
-void CheakIsLineReady (int* NLines)
+void CheakIsLineReady (int Field[SizeY][SizeX], int* NLines)
     {
     int nLines = SizeY-1;
 
@@ -159,23 +177,22 @@ void CheakIsLineReady (int* NLines)
 
 //====================================================
 
-void DrawPlayGame (HDC tiles, HDC background, int ColorNum)   // DrawField
+void DrawPlayGame (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum)   // DrawField
     {
+
     txBitBlt (txDC (), 0, 0, WndSize.x, WndSize.y, background);
 
-    for (int i = 0; i < SizeY; i++)   // TODO change i to y; j to x
-        for (int j = 0; j < SizeX; j++)
+    for (int y = 0; y < SizeY; y++)
+        for (int x = 0; x < SizeX; x++)
             {
-            //printf ("%i", Field[i][j]);
 
-            if (Field[i][j] == 0) continue;
+            if (Field[y][x] == 0) continue;
 
-            txBitBlt (txDC (), j*SizeTile + WField, i*SizeTile, SizeTile, SizeTile, tiles, Field [i][j] * SizeTile, 0);
+            txBitBlt (txDC (), x*SizeTile + WField, y*SizeTile, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
             }
 
     for (int i = 0; i < 4; i++)
         {
-        //printf ("x %i, y %i\NumBrick", posOfFigur [i].x, posOfFigur [i].y);
 
         txBitBlt (txDC (), posOfFigur [i].x * SizeTile + WField, posOfFigur [i].y * SizeTile, SizeTile, SizeTile, tiles, ColorNum * SizeTile, 0);
         }
@@ -183,16 +200,18 @@ void DrawPlayGame (HDC tiles, HDC background, int ColorNum)   // DrawField
 
 //====================================================
 
-void StepPlayGame (bool cheatMode, int* ColorNum, int* NumBrick)   // UpdatePlayGame
+void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* NumBrick)   // UpdatePlayGame
     {
+    Point oldPosOfFigur [4] = {0};
+
+    copyArray (oldPosOfFigur, posOfFigur, 4);
+
     for (int i = 0; i < 4; i++)
         {
-        oldPosOfFigur [i] = posOfFigur [i];
-
         posOfFigur [i].y += 1;
         }
 
-    if (!checkBorder ())
+    if (!checkBorder (Field))
         {
         for (int i = 0; i < 4; i++) {Field [oldPosOfFigur[i].y][oldPosOfFigur[i].x] = *ColorNum;}
 
@@ -202,8 +221,12 @@ void StepPlayGame (bool cheatMode, int* ColorNum, int* NumBrick)   // UpdatePlay
 
 //====================================================
 
-void keyBoardControl (const aKeyBoardControl theControl)
+void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl)
     {
+    Point oldPosOfFigur [4] = {0};
+
+    copyArray (oldPosOfFigur, posOfFigur, 4);
+
     int dx = 0;
 
     if (GetAsyncKeyState (theControl.right))
@@ -213,18 +236,20 @@ void keyBoardControl (const aKeyBoardControl theControl)
         dx = -1;
 
     if (GetAsyncKeyState (theControl.up))
-        RotateFigure ();
+        {
+        RotateFigure (Field);
         txSleep (10);
+        }
 
     for (int i = 0; i < 4; i++) { oldPosOfFigur [i] = posOfFigur [i]; posOfFigur [i].x += dx; }
 
-    if (!checkBorder ())
+    if (!checkBorder (Field))
         for (int i = 0; i < 4; i++) posOfFigur [i] = oldPosOfFigur [i];
     }
 
 //====================================================
 
-bool checkBorder ()
+bool checkBorder (int Field[SizeY][SizeX])
     {
     for (int i = 0; i < 4; i++)
         {
@@ -238,8 +263,12 @@ bool checkBorder ()
 
 //====================================================
 
-void RotateFigure ()
+void RotateFigure (int Field[SizeY][SizeX])
     {
+    Point oldPosOfFigur [4] = {0};
+
+    copyArray (oldPosOfFigur, posOfFigur, 4);
+
     Point p = posOfFigur [1];
 
     for (int i = 0; i < 4; i++)
@@ -251,5 +280,12 @@ void RotateFigure ()
         posOfFigur [i].y =    p.y +   y;
         }
 
-    if (!checkBorder ()) for (int i = 0; i < 4; i++) posOfFigur [i] = oldPosOfFigur [i];
+    if (!checkBorder (Field)) for (int i = 0; i < 4; i++) posOfFigur [i] = oldPosOfFigur [i];
+    }
+
+//====================================================
+
+void copyArray (Point oldArr [], Point newArr [], int lenArr)
+    {
+    for (int i = 0; i < lenArr; i++) {oldArr [i] = newArr [i];}
     }
