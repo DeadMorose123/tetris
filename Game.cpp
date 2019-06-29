@@ -11,36 +11,23 @@ struct aKeyBoardControl
     };
 
 struct Point
-    {
-    int x, y;
-    };
+    {int x, y;};
 
-struct RunGamePar
-    {
-    HDC tiles;
-    HDC background;
-    bool cheatMode;
-    Point position;
-    aKeyBoardControl Player;
-    };
+Point posOfFigur[4] = {};  // TODO del from global list
 
-void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl, Point posOfFigur[]);
-bool checkBorder (int Field[SizeY][SizeX], Point posOfFigur []);
-void RotateFigure (int Field[SizeY][SizeX], Point posOfFigur []);
-void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* NumBrick, int* newColorNum, int* newNumBrick, Point posOfFigur[]);
-void DrawField (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum, Point posOfFigur[], Point position);
+void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl);
+bool checkBorder (int Field[SizeY][SizeX]);
+void RotateFigure (int Field[SizeY][SizeX]);
+void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* NumBrick);
+void DrawPlayGame (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum);
 void CheakIsLineReady (int Field[SizeY][SizeX], int* NLines);
-int RunGame (RunGamePar* game);
-void CreatNewFigure (bool cheatMode, int* NumBrick,  int* newNumBrick, int* newColorNum, Point posOfFigur[]);
+int PlayGame(HDC tiles, HDC background, bool cheatMode);
+void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum);
 void copyArray (Point oldArr [], Point newArr [], int lenArr);
 
 void PrintScore (int NLines);
 void PrintTime (int timer);
-void PrintNextFigur (HDC tiles, int newNumBrick, int newColorNum, Point position);
-
-int RunLevels (bool cheatMode);
-int Level1 (bool cheatMode);
-int Level2 (bool cheatMode);
+//void PrintNextFigure (int Field[SizeY][SizeX], HDC tiles);
 
 const int Figures[7][4] =
     {
@@ -53,131 +40,84 @@ const int Figures[7][4] =
     {2, 3, 4, 5}  // O  6
     };
 
-int RunLevels (bool cheatMode)
-    {
-    int     ok = Level1 (cheatMode);
-    //if (ok) ok += Level2 (cheatMode);
-    //if (ok) ok = Level3 (cheatMode);
-
-
-    std :: cout << ok;
-    return ok;
-    }
-
-//====================================================
-
-int Level1 (bool cheatMode)
-    {
-    RunGamePar game1 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {0, 0}, {'A', 'W', 'D', 'S'}};
-
-   // _beginthread (RunGame, 0, &game1,
-
-    return RunGame (&game1);
-
-    }
-
-//====================================================
-
-/*int Level2 (bool cheatMode)
+int PlayGame (HDC tiles, HDC background, bool cheatMode)
     {
 
 
-    _beginthread (RunGame, 0,
-
-    int Score = RunGame (Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {0, 0}, {'A', 'W', 'D', 'S'});
-    Score += RunGame (Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {870, 1023}, {VK_LEFT, VK_UP, VK_RIGHT, VK_DOWN});
-
-    return Score;
-    }       */
-
-//====================================================
-int RunGame (RunGamePar* game)
-    {
-
-    HDC              tiles      = game -> tiles;
-    HDC              background = game -> background;
-    bool             cheatMode  = game -> cheatMode;
-    Point            position   = game -> position;
-    aKeyBoardControl Player     = game -> Player;
-
+    Music music;//создаем объект музыки
+    music.openFromFile("music.ogg");//загружаем файл
+    music.play();//воспроизводим музыку
     int Field[SizeY][SizeX] = {0};
 
-    int newNumBrick = rand() % 6;
     int NumBrick = rand() % 6;
 
-    int newColorNum = 1 + rand() % 7;
     int ColorNum = 1 + rand() % 7;
 
     int NLines = 0;
 
     int timer = GetTickCount ();
-
-    Point posOfFigur[4] = {};
     txBegin ();
 
-    CreatNewFigure (cheatMode, &NumBrick, &newNumBrick, &newColorNum, posOfFigur);
-
-    txPlaySound ("music.wav", SND_LOOP);
+    aKeyBoardControl Player = {'A', 'W', 'D', 'S'};
 
 
-    while (checkBorder(Field, posOfFigur))
+    CreatNewFigure (cheatMode, &NumBrick, &ColorNum);
+
+    while (checkBorder(Field))
         {
+        StepPlayGame(Field, cheatMode, &ColorNum, &NumBrick);
 
-        StepPlayGame(Field, cheatMode, &ColorNum, &NumBrick, &newColorNum, &newNumBrick, posOfFigur);
-
-        keyBoardControl (Field, Player, posOfFigur);
+        keyBoardControl (Field, Player);
 
         CheakIsLineReady (Field, &NLines);
 
-        DrawField (Field, tiles, background, ColorNum, posOfFigur, position);
+        DrawPlayGame (Field, tiles, background, ColorNum);
 
         PrintScore (NLines);
 
         PrintTime (timer);
 
-        PrintNextFigur (tiles, newNumBrick, newColorNum, position);
+        //PrintNextFigure (Field, tiles);
 
         txSleep (100);
         }
 
-    PrintTime(timer);
-    txPlaySound (NULL);
+    for (int y = 0; y < SizeY; y++)
+        for (int x = 0; x < SizeX; x++)
+            Field [y][x] = 0;
 
-    return NLines * 10;
+    NLines = 0;
+
+    PrintTime(timer);
+
+    return 0;
     }
 
 //====================================================
-
-void PrintNextFigur (HDC tiles, int newNumBrick, int newColorNum, Point position)
+/*void PrintNextFigure (int Field[SizeY][SizeX], HDC tiles)
     {
-    Point posOfFigur[4] = {};
-
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < SizeY; i++)
         {
-        posOfFigur[i].x = Figures[newNumBrick][i] % 2 + SizeX / 2;
 
-        posOfFigur[i].y = Figures[newNumBrick][i] / 2;
+        txBitBlt (txDC (), 625, 90, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
         }
-
-    for (int i = 0; i < 4; i++)
-        {
-        txBitBlt (txDC (), posOfFigur [i].x * 35 + WField + position.x + 420, posOfFigur [i].y * 35 + position.y + 93, SizeTile, SizeTile, tiles, newColorNum * SizeTile, 0);
-        }
-    }
-
+    } */
 
 //====================================================
 
 void PrintTime (int timer)
     {
-    timer = (GetTickCount () - timer) / 1000;
+    timer = GetTickCount () - timer;
 
     char textOfTime [50] = "";
-    unsigned n = sprintf (textOfTime, "%i:%02i", timer/60, timer%60);
+    unsigned n = sprintf (textOfTime, "%i:%i", timer/60000, timer/1000);
     assert (n < sizeof (textOfTime) - 1);
 
     txSetColor (TX_BLACK);
-    txSelectFont ("Impact", 100);
+
+    if (txFontExist ("Impact")) txSelectFont ("Impact", 100);
+    if (txFontExist ("Ubuntu")) txSelectFont ("Ubuntu", 150);
+
     txDrawText (621, 824, 799, 979, textOfTime);
     }
 
@@ -187,21 +127,23 @@ void PrintScore (int NLines)
     {
     char lines [10] = "";
     sprintf (lines, "%i", NLines*10);
-
     txSetColor (TX_BLACK);
-    txSelectFont ("Impact", 100);
+
+    if (txFontExist ("Impact")) txSelectFont ("Impact", 100);
+    if (txFontExist ("Ubuntu")) txSelectFont ("Ubuntu", 150);
+
     txDrawText (621, 585, 799, 736, lines);
     }
 
 //====================================================
 
-void CreatNewFigure (bool cheatMode, int* NumBrick, int* newNumBrick, int* newColorNum, Point posOfFigur[])
+void CreatNewFigure (bool cheatMode, int* NumBrick, int* ColorNum)
     {
     if (cheatMode) *NumBrick = 0;
 
-    else *newNumBrick = rand() % 6;
+    else *NumBrick = rand() % 6;
 
-    *newColorNum = 1 + rand() % 7;
+    *ColorNum = 1 + rand() % 7;
 
     for (int i = 0; i < 4; i++)
         {
@@ -235,28 +177,30 @@ void CheakIsLineReady (int Field[SizeY][SizeX], int* NLines)
 
 //====================================================
 
-void DrawField (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum, Point posOfFigur [], Point position)   // DrawField
+void DrawPlayGame (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum)   // DrawField
     {
 
-    txBitBlt (txDC (), position.x, position.y, WndSz.x, WndSz.y, background);
+    txBitBlt (txDC (), 0, 0, WndSize.x, WndSize.y, background);
 
     for (int y = 0; y < SizeY; y++)
         for (int x = 0; x < SizeX; x++)
             {
+
             if (Field[y][x] == 0) continue;
 
-            txBitBlt (txDC (), x*SizeTile + WField + position.x, y*SizeTile + position.y, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
+            txBitBlt (txDC (), x*SizeTile + WField, y*SizeTile, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
             }
 
     for (int i = 0; i < 4; i++)
         {
-        txBitBlt (txDC (), posOfFigur [i].x * SizeTile + WField + position.x, posOfFigur [i].y * SizeTile + position.y, SizeTile, SizeTile, tiles, ColorNum * SizeTile, 0);
+
+        txBitBlt (txDC (), posOfFigur [i].x * SizeTile + WField, posOfFigur [i].y * SizeTile, SizeTile, SizeTile, tiles, ColorNum * SizeTile, 0);
         }
     }
 
 //====================================================
 
-void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* NumBrick, int* newColorNum, int* newNumBrick, Point posOfFigur [])
+void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* NumBrick)   // UpdatePlayGame
     {
     Point oldPosOfFigur [4] = {0};
 
@@ -267,20 +211,17 @@ void StepPlayGame (int Field[SizeY][SizeX], bool cheatMode, int* ColorNum, int* 
         posOfFigur [i].y += 1;
         }
 
-    if (!checkBorder (Field, posOfFigur))
+    if (!checkBorder (Field))
         {
         for (int i = 0; i < 4; i++) {Field [oldPosOfFigur[i].y][oldPosOfFigur[i].x] = *ColorNum;}
 
-        *NumBrick = *newNumBrick;
-        *ColorNum = *newColorNum;
-
-        CreatNewFigure (cheatMode, NumBrick, newNumBrick, newColorNum, posOfFigur);
+        CreatNewFigure (cheatMode, NumBrick, ColorNum);
         }
     }
 
 //====================================================
 
-void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl, Point posOfFigur[])
+void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl)
     {
     Point oldPosOfFigur [4] = {0};
 
@@ -296,19 +237,19 @@ void keyBoardControl (int Field[SizeY][SizeX], const aKeyBoardControl theControl
 
     if (GetAsyncKeyState (theControl.up))
         {
-        RotateFigure (Field, posOfFigur);
+        RotateFigure (Field);
         txSleep (10);
         }
 
     for (int i = 0; i < 4; i++) { oldPosOfFigur [i] = posOfFigur [i]; posOfFigur [i].x += dx; }
 
-    if (!checkBorder (Field, posOfFigur))
+    if (!checkBorder (Field))
         for (int i = 0; i < 4; i++) posOfFigur [i] = oldPosOfFigur [i];
     }
 
 //====================================================
 
-bool checkBorder (int Field[SizeY][SizeX], Point posOfFigur[])
+bool checkBorder (int Field[SizeY][SizeX])
     {
     for (int i = 0; i < 4; i++)
         {
@@ -322,7 +263,7 @@ bool checkBorder (int Field[SizeY][SizeX], Point posOfFigur[])
 
 //====================================================
 
-void RotateFigure (int Field[SizeY][SizeX], Point posOfFigur[])
+void RotateFigure (int Field[SizeY][SizeX])
     {
     Point oldPosOfFigur [4] = {0};
 
@@ -339,7 +280,7 @@ void RotateFigure (int Field[SizeY][SizeX], Point posOfFigur[])
         posOfFigur [i].y =    p.y +   y;
         }
 
-    if (!checkBorder (Field, posOfFigur)) for (int i = 0; i < 4; i++) posOfFigur [i] = oldPosOfFigur [i];
+    if (!checkBorder (Field)) for (int i = 0; i < 4; i++) posOfFigur [i] = oldPosOfFigur [i];
     }
 
 //====================================================
