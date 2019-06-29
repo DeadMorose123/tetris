@@ -1,0 +1,30 @@
+#include "include.h"
+
+void changeX (void*);
+
+int X = 0;
+CRITICAL_SECTION LockX = {};
+
+int main ()
+    {
+    InitializeCriticalSection (&LockX);
+
+    _beginthread (changeX, 0, nullptr);
+
+    for (;;)
+        {
+        EnterCriticalSection ( 
+        printf ("%i\n", X);
+        }
+
+    DeleteCriticalSection (&LockX);
+
+    }
+
+void changeX (void*)
+    {
+    while (true)
+        {
+        if (++X > 9) X = 0;
+        }
+    }

@@ -1,7 +1,7 @@
 #include "include.h"
 #include <cstring>
 
-const POINT WndSz = {870, 1023};
+const POINT WndSz = {870*2, 1023};
 
 enum ResourseID {GameBut, OptionsBut, AchievementsBut, LeaderboardsBut, ExitBut, Menu, Tetris, tiles, Framework, youLose};
 
@@ -38,6 +38,8 @@ void drawMenu (Button ButMenu []);
 
 int main ()
     {
+    InitializeCriticalSection (&LockDesktop);
+
     txDisableAutoPause();
     //_txConsoleMode = SW_SHOW;
     txBegin ();
@@ -51,26 +53,31 @@ int main ()
                         {561, 649, 255, 92, "Exit"             },  // 5
                         END                                     };
 
-
-
     loadResourses (Resourses);
     loadButtons (ButMenu);
 
     while (true)
         {
-
         drawMenu (ButMenu);
         checkButtons (ButMenu);
+
         if (ButMenu[5].check () == 2)
             {
             break;
             }
+
         txSleep (50);
         }
+
     deleteResourses (Resourses);
+
+    DeleteCriticalSection (&LockDesktop);
+
     return 0;
     }
+
 //=============================================================================
+
 void checkButtons (Button ButMenu [])
         {
 
@@ -89,7 +96,9 @@ void checkButtons (Button ButMenu [])
                 }
             }
         }
+
 //=============================================================================
+
 void drawMenu (Button ButMenu [])
     {
     for (int i = 0; Resourses[i].name[0] != 0; i++)
@@ -115,7 +124,9 @@ void drawMenu (Button ButMenu [])
             }
         }
     }
+
 //=============================================================================
+
 void loadResourses (Resourse resourses[])
     {
     for (int i = 0; resourses[i].name[0] != 0; i++)
