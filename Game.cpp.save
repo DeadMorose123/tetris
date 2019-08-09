@@ -54,66 +54,16 @@ const int Figures[7][4] =
     {2, 3, 4, 5}  // O  6
     };
 
-CRITICAL_SECTION LockDesktop = {};
-
-//====================================================
-
-int RunLevels (bool cheatMode)
-    {
-
-
-    int     ok = Level2 (cheatMode);
-    //if (ok) ok += Level2 (cheatMode);
-    //if (ok) ok = Level3 (cheatMode);
-
-    std :: cout << ok;
-    return ok;
-    }
-
-//====================================================
-
-int Level1 (bool cheatMode)
-    {
-    RunGamePar game1 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {0, 0}, {'A', 'W', 'D', 'S'}, -1};
-
-    _beginthread (RunGame, 0, &game1);
-
-    while (game1.score == -1)
-        {
-        Sleep (200);
-        }
-
-    return game1.score;
-    }
-
-//====================================================
-
-int Level2 (bool cheatMode)
-    {
-    RunGamePar game1 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {0, 0}, {'A', 'W', 'D', 'S'}, -1};
-    RunGamePar game2 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {870, 0}, {VK_LEFT, VK_UP, VK_RIGHT, VK_DOWN}, -1};
-
-    _beginthread (RunGame, 0, &game1);
-    _beginthread (RunGame, 0, &game2);
-
-    while (game1.score == 0 && game2.score == 0)
-        {
-        Sleep (200);
-        }
-
-    return game1.score + game2.score;
-
-    }
 
 //====================================================
 void RunGame (void* game)
     {
-    HDC              tiles      =  ((RunGamePar*) game) -> tiles;
-    HDC              background =  ((RunGamePar*) game) -> background;
-    bool             cheatMode  =  ((RunGamePar*) game) -> cheatMode;
-    Point            position   =  ((RunGamePar*) game) -> position;
-    aKeyBoardControl Player     =  ((RunGamePar*) game) -> Player;
-    volatile int*    Score      = &((RunGamePar*) game) -> score;
+    HDC              tiles      =  Resourses[tiles].pic;
+    HDC              background =  Resourses[Tetris].pic;
+    bool             cheatMode  =  cheatMode;
+    Point            position   =  {0, 0};
+    aKeyBoardControl Player     =  {'A', 'W', 'D', 'S'};
+    volatile int    Score       = -1;
 
     HDC dc = txCreateCompatibleDC (WndSz.x, WndSz.y);
 
@@ -127,7 +77,7 @@ void RunGame (void* game)
 
     int NLines = 0;
 
-    int timer = GetTickCount ();                
+    int timer = GetTickCount ();
 
     Point posOfFigur[4] = {};
     txBegin ();
@@ -191,7 +141,7 @@ void PrintTime (int timer, HDC dc)
     unsigned n = sprintf (textOfTime, "%i:%02i", timer/60, timer%60);
     assert (n < sizeof (textOfTime) - 1);
 
-    txSetColor (TX_BLACK, 1, dc);
+    txSetColor (TX_BLACK, 1);
     txSelectFont ("Impact", 100, -1, FW_DONTCARE, false, false, false, 0, dc);
     txDrawText (621, 824, 799, 979, textOfTime, DT_CENTER|DT_VCENTER|DT_WORDBREAK|DT_WORD_ELLIPSIS, dc);
     }

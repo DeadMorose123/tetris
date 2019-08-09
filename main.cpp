@@ -83,7 +83,7 @@ void checkButtons (Button ButMenu [])
 
         if (ButMenu[1].check () == 2)
             {
-            RunLevels (0);
+            RunGame()
 
             txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
             txSleep (3000);
@@ -92,7 +92,7 @@ void checkButtons (Button ButMenu [])
             {
             if (strcmp (txInputBox ("Type your cheat code", "CHEAT"), "qwert") == 0)
                 {
-                RunLevels (1);
+                RunGame;
                 }
             }
         }

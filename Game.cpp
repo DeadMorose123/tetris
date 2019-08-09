@@ -54,66 +54,16 @@ const int Figures[7][4] =
     {2, 3, 4, 5}  // O  6
     };
 
-CRITICAL_SECTION LockDesktop = {};
-
-//====================================================
-
-int RunLevels (bool cheatMode)
-    {
-
-
-    int     ok = Level2 (cheatMode);
-    //if (ok) ok += Level2 (cheatMode);
-    //if (ok) ok = Level3 (cheatMode);
-
-    std :: cout << ok;
-    return ok;
-    }
-
-//====================================================
-
-int Level1 (bool cheatMode)
-    {
-    RunGamePar game1 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {0, 0}, {'A', 'W', 'D', 'S'}, -1};
-
-    _beginthread (RunGame, 0, &game1);
-
-    while (game1.score == -1)
-        {
-        Sleep (200);
-        }
-
-    return game1.score;
-    }
-
-//====================================================
-
-int Level2 (bool cheatMode)
-    {
-    RunGamePar game1 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {0, 0}, {'A', 'W', 'D', 'S'}, -1};
-    RunGamePar game2 = {Resourses[tiles].pic, Resourses[Tetris].pic, cheatMode, {870, 0}, {VK_LEFT, VK_UP, VK_RIGHT, VK_DOWN}, -1};
-
-    _beginthread (RunGame, 0, &game1);
-    _beginthread (RunGame, 0, &game2);
-
-    while (game1.score == 0 && game2.score == 0)
-        {
-        Sleep (200);
-        }
-
-    return game1.score + game2.score;
-
-    }
 
 //====================================================
 void RunGame (void* game)
     {
-    HDC              tiles      =  ((RunGamePar*) game) -> tiles;
-    HDC              background =  ((RunGamePar*) game) -> background;
-    bool             cheatMode  =  ((RunGamePar*) game) -> cheatMode;
-    Point            position   =  ((RunGamePar*) game) -> position;
-    aKeyBoardControl Player     =  ((RunGamePar*) game) -> Player;
-    volatile int*    Score      = &((RunGamePar*) game) -> score;
+    HDC              tiles      =  Resourses[tiles].pic;
+    HDC              background =  Resourses[Tetris].pic;
+    bool             cheatMode  =  false;
+    Point            position   =  {0, 0};
+    aKeyBoardControl Player     =  {'A', 'W', 'D', 'S'};
+    volatile int     Score      = -1;
 
     HDC dc = txCreateCompatibleDC (WndSz.x, WndSz.y);
 
@@ -164,7 +114,7 @@ void RunGame (void* game)
 
 //====================================================
 
-void PrintNextFigur (HDC tiles, int newNumBrick, int newColorNum, Point position, HDC dc)
+void PrintNextFigur (HDC tiles, int newNumBrick, int newColorNum, Point position)
     {
     Point posOfFigur[4] = {};
 
@@ -177,13 +127,13 @@ void PrintNextFigur (HDC tiles, int newNumBrick, int newColorNum, Point position
 
     for (int i = 0; i < 4; i++)
         {
-        txBitBlt (dc, posOfFigur [i].x * 35 + WField + position.x + 420, posOfFigur [i].y * 35 + position.y + 93, SizeTile, SizeTile, tiles, newColorNum * SizeTile, 0);
+        txBitBlt (txDC(), posOfFigur [i].x * 35 + WField + position.x + 420, posOfFigur [i].y * 35 + position.y + 93, SizeTile, SizeTile, tiles, newColorNum * SizeTile, 0);
         }
     }
 
 //====================================================
 
-void PrintTime (int timer, HDC dc)
+void PrintTime (int timer)
     {
     timer = (GetTickCount () - timer) / 1000;
 
@@ -191,21 +141,21 @@ void PrintTime (int timer, HDC dc)
     unsigned n = sprintf (textOfTime, "%i:%02i", timer/60, timer%60);
     assert (n < sizeof (textOfTime) - 1);
 
-    txSetColor (TX_BLACK, 1, dc);
+    txSetColor (TX_BLACK, 1);
     txSelectFont ("Impact", 100, -1, FW_DONTCARE, false, false, false, 0, dc);
     txDrawText (621, 824, 799, 979, textOfTime, DT_CENTER|DT_VCENTER|DT_WORDBREAK|DT_WORD_ELLIPSIS, dc);
     }
 
 //====================================================
 
-void PrintScore (int NLines, HDC dc)
+void PrintScore (int NLines)
     {
     char lines [10] = "";
     sprintf (lines, "%i", NLines*10);
 
-    txSetColor (TX_BLACK, 1, dc);
-    txSelectFont ("Impact", 100, -1, FW_DONTCARE, false, false, false, 0, dc);
-    txDrawText (621, 585, 799, 736, lines, DT_CENTER|DT_VCENTER|DT_WORDBREAK|DT_WORD_ELLIPSIS, dc);
+    txSetColor (TX_BLACK, 1);
+    txSelectFont ("Impact", 100, -1, FW_DONTCARE, false, false, false, 0);
+    txDrawText (621, 585, 799, 736, lines, DT_CENTER|DT_VCENTER|DT_WORDBREAK|DT_WORD_ELLIPSIS);
     }
 
 //====================================================
@@ -250,7 +200,7 @@ void CheakIsLineReady (int Field[SizeY][SizeX], int* NLines)
 
 //====================================================
 
-void DrawField (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum, Point posOfFigur [], Point position, HDC dc)
+void DrawField (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum, Point posOfFigur [], Point position)
     {
     //txBitBlt (dc, position.x, position.y, WndSz.x, WndSz.y, background);
 
@@ -259,12 +209,12 @@ void DrawField (int Field[SizeY][SizeX], HDC tiles, HDC background, int ColorNum
             {
             if (Field[y][x] == 0) continue;
 
-            txBitBlt (dc, x*SizeTile + WField + position.x, y*SizeTile + position.y, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
+            txBitBlt (txDC(), x*SizeTile + WField + position.x, y*SizeTile + position.y, SizeTile, SizeTile, tiles, Field [y][x] * SizeTile, 0);
             }
 
     for (int i = 0; i < 4; i++)
         {
-        txBitBlt (dc, posOfFigur [i].x * SizeTile + WField + position.x, posOfFigur [i].y * SizeTile + position.y, SizeTile, SizeTile, tiles, ColorNum * SizeTile, 0);
+        txBitBlt (txDC(), posOfFigur [i].x * SizeTile + WField + position.x, posOfFigur [i].y * SizeTile + position.y, SizeTile, SizeTile, tiles, ColorNum * SizeTile, 0);
         }
     }
 
