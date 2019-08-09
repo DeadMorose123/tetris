@@ -1,9 +1,13 @@
 #include "include.h"
 #include <cstring>
 
+<<<<<<< HEAD
 const POINT WndSz = {870*2, 1023};
 
 enum ResourseID {GameBut, OptionsBut, AchievementsBut, LeaderboardsBut, ExitBut, Menu, Tetris, tiles, Framework, youLose};
+=======
+const POINT WndSize = {870, 1023};
+>>>>>>> parent of e58183c... add next fihur
 
 #include "Button.h"
 #include "Button.cpp"
@@ -11,29 +15,16 @@ enum ResourseID {GameBut, OptionsBut, AchievementsBut, LeaderboardsBut, ExitBut,
 #include "Resource.h"
 #include "Resource.cpp"
 
-#define END  {}
-
-Resourse Resourses[] = {{"Game"             }, // 0
-                        {"Options"          }, // 1
-                        {"Achievements"     }, // 2
-                        {"Leaderboards"     }, // 3
-                        {"Exit"             }, // 4
-                        {"Menu"             }, // 5
-                        {"Tetris"           }, // 6
-                        {"tiles"            }, // 7
-                        {"Framework"        }, // 8
-                        {"youLose"          }, // 9
-                        END                  };
-
 #include "Game.cpp"
 
-void checkButtons (Button ButMenu []);
-void loadResourses (Resourse resourses[]);
-void deleteResourses (Resourse resourses[]);
-void loadButtons (Button ButMenu[]);
+void checkButtons (Button ButMenu [],Resourse Resourses[]);
+void loadResourses (Resourse Resourses[]);
+void deleteResourses (Resourse Resourses[]);
+void loadButtons (Resourse Resourses[], Button ButMenu[]);
 
-void drawMenu (Button ButMenu []);
+void drawMenu (Resourse Resourses [], Button ButMenu []);
 
+#define END  {}
 #define debug printf("= %d  \n", __LINE__)
 
 int main ()
@@ -43,7 +34,7 @@ int main ()
     txDisableAutoPause();
     //_txConsoleMode = SW_SHOW;
     txBegin ();
-    txCreateWindow (WndSz.x, WndSz.y);
+    txCreateWindow (WndSize.x, WndSize.y);
 
     Button ButMenu[] = {{  0,   0,   0,  0, "Framework"        },  // 0
                         {561, 205, 255, 92, "Game"             },  // 1
@@ -53,14 +44,35 @@ int main ()
                         {561, 649, 255, 92, "Exit"             },  // 5
                         END                                     };
 
+<<<<<<< HEAD
+=======
+    Resourse Resourses[] = {{"Game"            }, // 0
+                           {"Options"          }, // 1
+                           {"Achievements"     }, // 2
+                           {"Leaderboards"     }, // 3
+                           {"Exit"             }, // 4
+                           {"Menu"             }, // 5
+                           {"Tetris"           }, // 6
+                           {"tiles"            }, // 7
+                           {"Framework"        }, // 8
+                           {"youLose"          }, // 9
+                           END                  };
+
+>>>>>>> parent of e58183c... add next fihur
     loadResourses (Resourses);
-    loadButtons (ButMenu);
+    loadButtons (Resourses, ButMenu);
 
     while (true)
         {
+<<<<<<< HEAD
         drawMenu (ButMenu);
         checkButtons (ButMenu);
 
+=======
+
+        drawMenu (Resourses, ButMenu);
+        checkButtons (ButMenu, Resourses);
+>>>>>>> parent of e58183c... add next fihur
         if (ButMenu[5].check () == 2)
             {
             break;
@@ -77,13 +89,22 @@ int main ()
     }
 
 //=============================================================================
+<<<<<<< HEAD
 
 void checkButtons (Button ButMenu [])
+=======
+//std :: pair <int, Button :: state_t> drawMenu (Button ButMenu [])
+void checkButtons (Button ButMenu [], Resourse Resourses [])
+>>>>>>> parent of e58183c... add next fihur
         {
 
         if (ButMenu[1].check () == 2)
             {
+<<<<<<< HEAD
             RunGame()
+=======
+            PlayGame (Resourses [7].pic, Resourses [6].pic, 0);
+>>>>>>> parent of e58183c... add next fihur
 
             txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
             txSleep (3000);
@@ -92,21 +113,31 @@ void checkButtons (Button ButMenu [])
             {
             if (strcmp (txInputBox ("Type your cheat code", "CHEAT"), "qwert") == 0)
                 {
+<<<<<<< HEAD
                 RunGame;
+=======
+                PlayGame (Resourses [7].pic, Resourses [6].pic, 1);
+                txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
+                txSleep (3000);
+>>>>>>> parent of e58183c... add next fihur
                 }
             }
         }
 
 //=============================================================================
+<<<<<<< HEAD
 
 void drawMenu (Button ButMenu [])
+=======
+void drawMenu (Resourse Resourses [], Button ButMenu [])
+>>>>>>> parent of e58183c... add next fihur
     {
     for (int i = 0; Resourses[i].name[0] != 0; i++)
         {
 
         if (strcmp(Resourses[i].name, "Menu") == 0)
             {
-            txBitBlt (txDC(), 0, 0, WndSz.x, WndSz.y, Resourses[i].pic);
+            txBitBlt (txDC(), 0, 0, WndSize.x, WndSize.y, Resourses[i].pic);
             }
         }
 
@@ -126,24 +157,28 @@ void drawMenu (Button ButMenu [])
     }
 
 //=============================================================================
+<<<<<<< HEAD
 
 void loadResourses (Resourse resourses[])
+=======
+void loadResourses (Resourse Resourses[])
+>>>>>>> parent of e58183c... add next fihur
     {
-    for (int i = 0; resourses[i].name[0] != 0; i++)
+    for (int i = 0; Resourses[i].name[0] != 0; i++)
         {
-        resourses[i].pic = loadDC (resourses[i].name);
+        Resourses[i].pic = loadDC (Resourses[i].name);
         }
     }
 //=============================================================================
-void deleteResourses (Resourse resourses[])
+void deleteResourses (Resourse Resourses[])
     {
-    for (int i = 0; resourses[i].name[1] != 0; i++)
+    for (int i = 0; Resourses[i].name[1] != 0; i++)
         {
-        txDeleteDC(resourses[i].pic);
+        txDeleteDC(Resourses[i].pic);
         }
     }
 //=============================================================================
-void loadButtons (Button ButMenu[])
+void loadButtons (Resourse Resourses[], Button ButMenu[])
     {
     for (int i = 0; Resourses[i].name[0] != 0; i++)
         {
