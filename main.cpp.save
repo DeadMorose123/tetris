@@ -1,14 +1,9 @@
 #include "include.h"
 #include <cstring>
 
-const POINT WndSz = {870, 1023};
+const POINT WndSz = {870*2, 1023};
 
-const int GameBut = 0;
-const int OptionsBut = 1;
-const int AchievementsBut = 2;
-const int LeaderboardsBut = 3;
-const int ExitBut = 4;
-const int Menu, Tetris, tiles, Framework, youLose = 9;
+enum ResourseID {GameBut, OptionsBut, AchievementsBut, LeaderboardsBut, ExitBut, Menu, Tetris, tiles, Framework, youLose};
 
 #include "Button.h"
 #include "Button.cpp"
@@ -33,8 +28,8 @@ Resourse Resourses[] = {{"Game"             }, // 0
 #include "Game.cpp"
 
 void checkButtons (Button ButMenu []);
-void loadResourses (Resourse Resourses[]);
-void deleteResourses (Resourse Resourses[]);
+void loadResourses (Resourse resourses[]);
+void deleteResourses (Resourse resourses[]);
 void loadButtons (Button ButMenu[]);
 
 void drawMenu (Button ButMenu []);
@@ -43,8 +38,10 @@ void drawMenu (Button ButMenu []);
 
 int main ()
     {
+    InitializeCriticalSection (&LockDesktop);
+
     txDisableAutoPause();
-    _txConsoleMode = SW_SHOW;
+    //_txConsoleMode = SW_SHOW;
     txBegin ();
     txCreateWindow (WndSz.x, WndSz.y);
 
@@ -56,32 +53,37 @@ int main ()
                         {561, 649, 255, 92, "Exit"             },  // 5
                         END                                     };
 
-
-
     loadResourses (Resourses);
     loadButtons (ButMenu);
 
     while (true)
         {
-
         drawMenu (ButMenu);
         checkButtons (ButMenu);
+
         if (ButMenu[5].check () == 2)
             {
             break;
             }
+
         txSleep (50);
         }
+
     deleteResourses (Resourses);
+
+    DeleteCriticalSection (&LockDesktop);
+
     return 0;
     }
+
 //=============================================================================
+
 void checkButtons (Button ButMenu [])
         {
 
         if (ButMenu[1].check () == 2)
             {
-            RunLevels (0);
+            RunGame()
 
             txBitBlt (txDC(), 0, 0, 0, 0, Resourses[9].pic);
             txSleep (3000);
@@ -90,11 +92,13 @@ void checkButtons (Button ButMenu [])
             {
             if (strcmp (txInputBox ("Type your cheat code", "CHEAT"), "qwert") == 0)
                 {
-                RunLevels (1);
+                RunGame;
                 }
             }
         }
+
 //=============================================================================
+
 void drawMenu (Button ButMenu [])
     {
     for (int i = 0; Resourses[i].name[0] != 0; i++)
@@ -120,20 +124,22 @@ void drawMenu (Button ButMenu [])
             }
         }
     }
+
 //=============================================================================
-void loadResourses (Resourse Resourses[])
+
+void loadResourses (Resourse resourses[])
     {
-    for (int i = 0; Resourses[i].name[0] != 0; i++)
+    for (int i = 0; resourses[i].name[0] != 0; i++)
         {
-        Resourses[i].pic = loadDC (Resourses[i].name);
+        resourses[i].pic = loadDC (resourses[i].name);
         }
     }
 //=============================================================================
-void deleteResourses (Resourse Resourses[])
+void deleteResourses (Resourse resourses[])
     {
-    for (int i = 0; Resourses[i].name[1] != 0; i++)
+    for (int i = 0; resourses[i].name[1] != 0; i++)
         {
-        txDeleteDC(Resourses[i].pic);
+        txDeleteDC(resourses[i].pic);
         }
     }
 //=============================================================================
